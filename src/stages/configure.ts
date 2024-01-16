@@ -18,7 +18,7 @@ export const configure = async () => {
 			core.info("Not adding attic cache to substituters as skip-use is set to true");
 		} else {
 			core.info("Adding attic cache to substituters");
-			await exec("attic", ["use", cache]);
+			await execWithRetry("attic", ["use", cache]);
 		}
 
 		core.info("Collecting store paths before build");
@@ -28,4 +28,18 @@ export const configure = async () => {
 	}
 
 	core.endGroup();
+};
+
+const execWithRetry = async (command: string, args: string[], retries: number = 10) => {
+    try {
+        await exec(command, args);
+    } catch (error) {
+        core.error(`Execution of ${command} failed with error: ${error}`);
+        if (retries > 0) {
+            core.info(`Retrying execution of ${command} (${retries} retries left)`);
+            await execWithRetry(command, args, retries - 1);
+        } else {
+            throw new Error(`Failed to execute ${command} after multiple retries`);
+        }
+    }
 };
