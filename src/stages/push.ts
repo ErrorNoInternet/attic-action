@@ -28,7 +28,7 @@ export const push = async () => {
 
 			const splitAddedPaths = splitArray(addedPaths, 25);
 			for (const addedPaths of splitAddedPaths) {
-				await exec("attic", ["push", cache, ...addedPaths]);
+				await execWithRetry("attic", ["push", cache, ...addedPaths]);
 			}
 		}
 	} catch (e) {
@@ -37,4 +37,18 @@ export const push = async () => {
 	}
 
 	core.endGroup();
+};
+
+const execWithRetry = async (command: string, args: string[], retries: number = 10) => {
+    try {
+        await exec(command, args);
+    } catch (error) {
+        core.error(`Execution of ${command} failed with error: ${error}`);
+        if (retries > 0) {
+            core.info(`Retrying execution of ${command} (${retries} retries left)`);
+            await execWithRetry(command, args, retries - 1);
+        } else {
+            throw new Error(`Failed to execute ${command} after multiple retries`);
+        }
+    }
 };
