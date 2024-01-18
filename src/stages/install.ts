@@ -10,7 +10,7 @@ export const install = async () => {
 
 	core.info("Installing attic");
 	const installScript = await fetch(
-		"https://raw.githubusercontent.com/ErrorNoInternet/attic/main/.github/install-attic-ci.sh",
+		"https://raw.githubusercontent.com/zhaofengli/attic/main/.github/install-attic-ci.sh",
 	).then((r) => {
 		if (!r.ok) {
 			core.setFailed(`Action failed with error: ${r.statusText}`);
