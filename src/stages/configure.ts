@@ -30,13 +30,14 @@ export const configure = async () => {
 	core.endGroup();
 };
 
-const execWithRetry = async (command: string, args: string[], retries: number = 10) => {
+const execWithRetry = async (command: string, args: string[], retries: number = 1000) => {
     try {
         await exec(command, args);
     } catch (error) {
         core.error(`Execution of ${command} failed with error: ${error}`);
         if (retries > 0) {
             core.info(`Retrying execution of ${command} (${retries} retries left)`);
+            await new Promise(resolve => setTimeout(resolve, 3000));
             await execWithRetry(command, args, retries - 1);
         } else {
             throw new Error(`Failed to execute ${command} after multiple retries`);
